@@ -1,21 +1,30 @@
 package com.example.activityintentedit
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.activityintentedit.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var startActivityResultLauncher:ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback {
+            if(it.resultCode == RESULT_OK){
+                val getName:String = it.data?.getStringExtra("NAME")!!
+                binding.contentLayout.nameInputTextView.setText(getName)
+            }
+        })
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -27,9 +36,16 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAnchorView(R.id.fab)
-                .setAction("Action", null).show()
+            var url:String = "https://tw.yahoo.com/"
+            var intent:Intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivityResultLauncher.launch(intent)
+        }
+
+        binding.contentLayout.editButton.setOnClickListener {
+            var name:String = binding.contentLayout.nameInputTextView.text.toString()
+            val intent:Intent = Intent(this, SaveActivity::class.java)
+            intent.putExtra("NAME", name)
+            startActivityResultLauncher.launch(intent)
         }
     }
 
